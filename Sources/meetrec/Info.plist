@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>local.meetrec</string>
+	<string>com.mozuq-lab.meetrec</string>
 	<key>CFBundleName</key>
 	<string>meetrec</string>
 	<key>CFBundleShortVersionString</key>

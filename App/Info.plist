@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>MeetRec</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.meetrec.MeetRec</string>
+	<string>com.mozuq-lab.MeetRec</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

@@ -3,9 +3,9 @@ import Foundation
 /// 同じ Mac のスクリプトやショートカットから録音を操作するための分散通知。
 /// URL スキームと違い、Web ページからは送れない。
 enum RemoteControl {
-    static let start = Notification.Name("local.meetrec.MeetRec.start")
-    static let stop = Notification.Name("local.meetrec.MeetRec.stop")
-    static let toggle = Notification.Name("local.meetrec.MeetRec.toggle")
+    static let start = Notification.Name("com.mozuq-lab.MeetRec.start")
+    static let stop = Notification.Name("com.mozuq-lab.MeetRec.stop")
+    static let toggle = Notification.Name("com.mozuq-lab.MeetRec.toggle")
 
     @MainActor
     static func observe(_ model: RecorderModel) {

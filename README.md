@@ -69,8 +69,8 @@ ad-hoc 署名の場合、macOS はビルドのたびに別のアプリとみな�
 権限の一覧に MeetRec が残っているのに録音できない場合は、古い記録を消してから許可し直します。
 
 ```sh
-tccutil reset ScreenCapture local.meetrec.MeetRec
-tccutil reset Microphone local.meetrec.MeetRec
+tccutil reset ScreenCapture com.mozuq-lab.MeetRec
+tccutil reset Microphone com.mozuq-lab.MeetRec
 ```
 
 ### 他の Mac に配る（公証）
@@ -103,10 +103,10 @@ scripts/build-app.sh --notarize
 
 ### スクリプトから操作する
 
-同じ Mac のスクリプトから、分散通知で録音を開始・停止できます。通知名は `local.meetrec.MeetRec.start`、`local.meetrec.MeetRec.stop`、`local.meetrec.MeetRec.toggle` です。
+同じ Mac のスクリプトから、分散通知で録音を開始・停止できます。通知名は `com.mozuq-lab.MeetRec.start`、`com.mozuq-lab.MeetRec.stop`、`com.mozuq-lab.MeetRec.toggle` です。
 
 ```sh
-osascript -l JavaScript -e 'ObjC.import("Foundation"); $.NSDistributedNotificationCenter.defaultCenter.postNotificationNameObjectUserInfoDeliverImmediately($("local.meetrec.MeetRec.toggle"), $(), $(), true)'
+osascript -l JavaScript -e 'ObjC.import("Foundation"); $.NSDistributedNotificationCenter.defaultCenter.postNotificationNameObjectUserInfoDeliverImmediately($("com.mozuq-lab.MeetRec.toggle"), $(), $(), true)'
 ```
 
 URL スキームと違い、Web ページからは操作できません。
