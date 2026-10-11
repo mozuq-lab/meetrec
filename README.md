@@ -53,9 +53,18 @@ CLI 版と違い、権限は **MeetRec.app 自体** に与えます。
 
 ### 署名と権限についての注意
 
-`scripts/build-app.sh` は、キーチェーンに **Apple Development 証明書** があればそれで署名し、なければ仮の署名（ad-hoc 署名）にします。ad-hoc 署名の場合、macOS はビルドのたびに別のアプリとみなすので、**ビルドし直すたびに権限の設定がやり直しになります**。
+`scripts/build-app.sh` は、キーチェーンにある証明書を次の順に探して署名します。
 
-これを避けるには、Xcode の「設定」>「アカウント」で Apple ID（無料で可）にサインインし、「証明書を管理」から Apple Development 証明書を作ってからビルドします。証明書を指定したい場合は `SIGN_IDENTITY` 環境変数で渡せます。
+| 順 | 証明書 | 用途 |
+| --- | --- | --- |
+| 1 | 環境変数 `SIGN_IDENTITY` で指定したもの | 証明書の名前の一部か SHA-1 ハッシュで指定する。`-` なら ad-hoc 署名 |
+| 2 | Developer ID Application | 他の Mac に配る場合。公証にはこれが必要（有料の Apple Developer Program） |
+| 3 | Apple Development | 自分の Mac だけで使う場合（無料の Apple ID で作れる） |
+| 4 | なし（ad-hoc 署名） | 証明書がない場合 |
+
+どの証明書でも、hardened runtime を有効にし、`App/MeetRec.entitlements`（マイクを使う許可）を付けて署名します。証明書は Xcode の「設定」>「アカウント」>「証明書を管理」で作れます。
+
+ad-hoc 署名の場合、macOS はビルドのたびに別のアプリとみなすので、**ビルドし直すたびに権限の設定がやり直しになります**。証明書で署名していれば、ビルドし直しても権限は引き継がれます。ただし、署名の種類を変えた（ad-hoc から Developer ID にした、など）ときは、一度だけやり直しになります。
 
 権限の一覧に MeetRec が残っているのに録音できない場合は、古い記録を消してから許可し直します。
 
@@ -63,6 +72,34 @@ CLI 版と違い、権限は **MeetRec.app 自体** に与えます。
 tccutil reset ScreenCapture local.meetrec.MeetRec
 tccutil reset Microphone local.meetrec.MeetRec
 ```
+
+### 他の Mac に配る（公証）
+
+他の Mac で開くには、Developer ID Application 証明書で署名し、Apple の公証を受ける必要があります。公証を受けていないアプリは、ダウンロードしたりメールや AirDrop で受け取ったりすると、Gatekeeper に起動を止められます。
+
+最初に 1 回だけ、公証用の認証情報をキーチェーンに保存します。パスワードは入力欄で聞かれるので、appleid.apple.com で作った **App 用パスワード** を入力します（通常のパスワードでは通りません）。
+
+```sh
+xcrun notarytool store-credentials meetrec-notary --apple-id <Apple ID> --team-id <チーム ID>
+```
+
+その後は、次のコマンドでビルドから公証までをまとめて実行できます。
+
+```sh
+scripts/build-app.sh --notarize
+```
+
+次の処理を順に行います。数分かかります。
+
+1. Developer ID で署名する
+2. 公証を申請し、結果を待つ
+3. 公証の結果を .app に埋め込む（stapler）
+4. Gatekeeper に通ることを確かめる
+5. 配布用の `build/MeetRec.zip` を作る
+
+公証に通らなかった場合は、Apple から返された理由を表示して止まります。キーチェーンプロファイルの名前を変えた場合は、`NOTARY_PROFILE` 環境変数で指定します。
+
+配れるのは、macOS 15 以降の Apple シリコンの Mac だけです（Intel の Mac では動きません）。
 
 ### スクリプトから操作する
 
@@ -179,7 +216,7 @@ swift test         # 書き出し（先頭の位置揃え・途切れの無音�
 | `Sources/MeetrecCore` | 録音（`SCStream`）、m4a への書き出し、ミックスなどの共通部分 |
 | `Sources/meetrec` | コマンドライン版 |
 | `Sources/MeetRecMenuBar` | メニューバー版（SwiftUI の `MenuBarExtra`） |
-| `App/Info.plist`, `scripts/build-app.sh` | MeetRec.app の組み立てと署名 |
+| `App/Info.plist`, `App/MeetRec.entitlements`, `scripts/build-app.sh` | MeetRec.app の組み立て、署名、公証 |
 
 ## 仕組みと制限
 
